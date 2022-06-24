@@ -1,6 +1,6 @@
-# SpringBackend
+![gimmebackend](/repo/header.png?raw=true "gimmebackend")
 
-Spring Backend application for Case #3 of [Fintech Hackathon, hosted in Terricon Valley](https://terricon.kz/ru/hackathon)  
+**gimmebackend** is a Spring Backend application made for Case #3 of [Fintech Hackathon, hosted in Terricon Valley](https://terricon.kz/ru/hackathon)  
 Used as a server-side application
 
 ## Installation
@@ -17,3 +17,6 @@ Used as a server-side application
 4. Push to the branch: `git push origin my-new-feature`
 5. Submit a pull request :D
 
+## Credits
+
+[Spring](https://spring.io/) - the thing that makes Java simple/modern/productive/reactive/cloud-ready/etc.
