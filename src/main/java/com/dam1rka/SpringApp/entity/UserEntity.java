@@ -21,7 +21,7 @@ public class UserEntity {
     private Date updated;
 
     @Enumerated(EnumType.STRING)
-    private StatusEntity status;
+    private StatusEnum status;
 
     private String username;
 
@@ -112,11 +112,11 @@ public class UserEntity {
         this.updated = updated;
     }
 
-    public StatusEntity getStatus() {
+    public StatusEnum getStatus() {
         return status;
     }
 
-    public void setStatus(StatusEntity status) {
+    public void setStatus(StatusEnum status) {
         this.status = status;
     }
 }

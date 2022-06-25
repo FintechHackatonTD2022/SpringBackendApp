@@ -22,6 +22,10 @@ public class RoleEntity {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     @Override
     public String toString() {
         return "Role{" +

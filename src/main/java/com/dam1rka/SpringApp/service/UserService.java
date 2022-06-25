@@ -1,7 +1,8 @@
 package com.dam1rka.SpringApp.service;
 
 import com.dam1rka.SpringApp.entity.RoleEntity;
-import com.dam1rka.SpringApp.entity.StatusEntity;
+import com.dam1rka.SpringApp.entity.RoleEnum;
+import com.dam1rka.SpringApp.entity.StatusEnum;
 import com.dam1rka.SpringApp.entity.UserEntity;
 import com.dam1rka.SpringApp.repository.RoleRepo;
 import com.dam1rka.SpringApp.repository.UserRepo;
@@ -26,13 +27,13 @@ public class UserService {
     }
 
     public UserEntity register(UserEntity user) {
-        RoleEntity roleUser = roleRepository.findByName("ROLE_USER");
+        RoleEntity roleUser = roleRepository.findByName(RoleEnum.USER.name());
         List<RoleEntity> userRoles = new ArrayList<>();
         userRoles.add(roleUser);
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRoles(userRoles);
-        user.setStatus(StatusEntity.ACTIVE);
+        user.setStatus(StatusEnum.ACTIVE);
 
         return userRepository.save(user);
     }

@@ -1,7 +1,7 @@
 package com.dam1rka.SpringApp.security.jwt;
 
 import com.dam1rka.SpringApp.entity.RoleEntity;
-import com.dam1rka.SpringApp.entity.StatusEntity;
+import com.dam1rka.SpringApp.entity.StatusEnum;
 import com.dam1rka.SpringApp.entity.UserEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -24,7 +24,7 @@ public final class JwtUserFactory {
                 user.getEmail(),
                 user.getPassword(),
                 mapToGrantedAuthorities(new ArrayList<>(user.getRoles())),
-                user.getStatus().equals(StatusEntity.ACTIVE),
+                user.getStatus().equals(StatusEnum.ACTIVE),
                 user.getUpdated()
         );
     }

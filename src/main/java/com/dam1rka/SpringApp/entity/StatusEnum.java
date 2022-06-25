@@ -1,5 +1,5 @@
 package com.dam1rka.SpringApp.entity;
 
-public enum StatusEntity {
+public enum StatusEnum {
     ACTIVE, NOT_ACTIVE, DELETED
 }
