@@ -17,6 +17,8 @@ public class OrderResponseEntity {
 
     private Integer iid;
 
+    private String chd;
+
     private String error_code;
 
     private String error_message;
@@ -68,5 +70,13 @@ public class OrderResponseEntity {
 
     public void setError_message(String error_message) {
         this.error_message = error_message;
+    }
+
+    public String getChd() {
+        return chd;
+    }
+
+    public void setChd(String chd) {
+        this.chd = chd;
     }
 }
