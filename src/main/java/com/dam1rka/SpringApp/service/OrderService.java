@@ -125,6 +125,14 @@ public class OrderService {
     public GetCardResponseDto getLastCard(GetCardDto getCardDto) {
         List<OrderEntity> orders = orderRepo.findByMsisdn(getCardDto.getTelephone());
 
+        if(orders.size() == 0)
+        {
+            GetCardResponseDto response = new GetCardResponseDto();
+            response.setCode("-1");
+            response.setMessage("Can't get card");
+            return response;
+        }
+
         OrderEntity order = orders.get(orders.size() - 1);
 
         // check days
