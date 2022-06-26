@@ -147,9 +147,9 @@ public class SecurityService {
         String[] data = decodeWooppay(token).split("\\+");
         CardInfoDto cardInfoDto = new CardInfoDto();
         cardInfoDto.setPan(data[0]);
-        cardInfoDto.setExp_month(data[1].substring(0, 2));
-        cardInfoDto.setExp_year(data[1].substring(2));
-        cardInfoDto.setCvc2(data[2]);
+        cardInfoDto.setExp_month(data[1]);
+        cardInfoDto.setExp_year(data[2]);
+        cardInfoDto.setCvc2(data[3]);
         return cardInfoDto;
     }
 
