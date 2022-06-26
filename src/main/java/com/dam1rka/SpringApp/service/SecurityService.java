@@ -31,6 +31,8 @@ public class SecurityService {
     @Value("${wooppay.private.key}")
     private String WOOPPAY_PRIVATE_KEY;
 
+    private Gson gson = new Gson();
+
     private String decode(String token) {
         PrivateKey privateKey = getPrivateKey(PRIVATE_KEY);
         byte[] decryptedBytes = decrypt(Base64.getDecoder().decode(token), privateKey);
@@ -127,14 +129,12 @@ public class SecurityService {
 
     public OrderDto decodeOrder(String token) {
         String data = decode(token);
-        Gson gson = new Gson();
         OrderDto orderDto = gson.fromJson(data, OrderDto.class);
         return orderDto;
     }
 
     public GetCardDto decodeGetCard(String token) {
         String data = decode(token);
-        Gson gson = new Gson();
         GetCardDto getCardDto = gson.fromJson(data, GetCardDto.class);
         return getCardDto;
     }
@@ -151,7 +151,8 @@ public class SecurityService {
     }
 
     public byte[] encodeCard(CardInfoDto cardInfoDto) {
-        byte[] encrypted = encode(cardInfoDto.toString());
+        String data = gson.toJson(cardInfoDto, CardInfoDto.class);
+        byte[] encrypted = encode(data);
         return encrypted;
     }
 }
