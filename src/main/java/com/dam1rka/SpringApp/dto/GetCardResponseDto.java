@@ -1,16 +1,16 @@
 package com.dam1rka.SpringApp.dto;
 
 public class GetCardResponseDto {
-    private String token;
+    private String encrypted;
     private String code;
     private String message;
 
-    public String getToken() {
-        return token;
+    public String getEncrypted() {
+        return encrypted;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setEncrypted(String token) {
+        this.encrypted = token;
     }
 
     public String getMessage() {

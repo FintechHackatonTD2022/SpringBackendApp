@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import javax.crypto.Cipher;
 import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.RSAPublicKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 @Service
@@ -31,27 +33,27 @@ public class SecurityService {
 
     private String decode(String token) {
         PrivateKey privateKey = getPrivateKey(PRIVATE_KEY);
-        byte[] decryptedBytes = decrypt(token.getBytes(), privateKey);
+        byte[] decryptedBytes = decrypt(Base64.getDecoder().decode(token), privateKey);
         return new String(decryptedBytes);
     }
 
     private String decodeWooppay(String token) {
         PrivateKey privateKey = getPrivateKey(WOOPPAY_PRIVATE_KEY);
-        byte[] decryptedBytes = decrypt(token.getBytes(), privateKey);
+        byte[] decryptedBytes = decrypt(Base64.getDecoder().decode(token), privateKey);
         return new String(decryptedBytes);
     }
 
-    private String encode(String data) {
+    private byte[] encode(String data) {
         PublicKey publicKey = getPublicKey(PUBLIC_KEY);
         byte[] encryptedBytes = encrypt(data.getBytes(), publicKey);
-        return new String(encryptedBytes);
+        return encryptedBytes;
     }
 
     private PublicKey getPublicKey(String publicKey) {
         try {
             RSAPublicKey rsaPublicKey = RSAPublicKey.getInstance(Base64.getDecoder().decode(publicKey));
-            byte[] publicKeyOnfoBytes = KeyUtil.getEncodedSubjectPublicKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE), rsaPublicKey);
-            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(publicKeyOnfoBytes);
+            byte[] publicKeyInfoBytes = KeyUtil.getEncodedSubjectPublicKeyInfo(new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE), rsaPublicKey);
+            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKeyInfoBytes);
             PublicKey key = KeyFactory.getInstance("RSA").generatePublic(keySpec);
             return key;
         } catch (Exception e) {
@@ -139,14 +141,17 @@ public class SecurityService {
 
 
     public CardInfoDto decodeCardInfo(String token) {
-        String data = decodeWooppay(token);
-        Gson gson = new Gson();
-        CardInfoDto cardInfoDto = gson.fromJson(data, CardInfoDto.class);
+        String[] data = decodeWooppay(token).split("\\+");
+        CardInfoDto cardInfoDto = new CardInfoDto();
+        cardInfoDto.setPan(data[0]);
+        cardInfoDto.setExp_month(data[1].substring(0, 2));
+        cardInfoDto.setExp_year(data[1].substring(2));
+        cardInfoDto.setCvc2(data[2]);
         return cardInfoDto;
     }
 
-    public String encodeCard(CardInfoDto cardInfoDto) {
-        String token = encode(cardInfoDto.toString());
-        return token;
+    public byte[] encodeCard(CardInfoDto cardInfoDto) {
+        byte[] encrypted = encode(cardInfoDto.toString());
+        return encrypted;
     }
 }

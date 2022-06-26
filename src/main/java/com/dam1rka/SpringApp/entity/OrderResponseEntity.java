@@ -1,5 +1,7 @@
 package com.dam1rka.SpringApp.entity;
 
+import org.hibernate.annotations.Columns;
+
 import javax.persistence.*;
 import java.util.Date;
 
@@ -17,6 +19,7 @@ public class OrderResponseEntity {
 
     private Integer iid;
 
+    @Column(columnDefinition = "NVARCHAR(512)")
     private String chd;
 
     private String error_code;
