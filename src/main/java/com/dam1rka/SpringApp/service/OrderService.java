@@ -100,9 +100,6 @@ public class OrderService {
         responseEntity.setError_code(responseDto.getCode());
         responseEntity.setError_message(responseDto.getMessage());
 
-        order = orderRepo.save(order);
-        orderResponseRepo.save(responseEntity);
-
         if(Objects.equals(responseDto.getCode(), "-1"))
         {
             GetCardResponseDto response = new GetCardResponseDto();
@@ -110,6 +107,9 @@ public class OrderService {
             response.setMessage("Failed");
             return response;
         }
+
+        order = orderRepo.save(order);
+        orderResponseRepo.save(responseEntity);
 
         // return card info
         CardInfoDto cardInfo = securityService.decodeCardInfo(responseEntity.getChd());
