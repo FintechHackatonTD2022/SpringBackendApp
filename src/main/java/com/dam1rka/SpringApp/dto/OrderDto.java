@@ -6,7 +6,7 @@ public class OrderDto {
     private String msisdn;
     private Integer currency;
     private BigDecimal amount;
-    private Object extraData;
+    private Object extra_data;
 
     public String getMsisdn() {
         return msisdn;
@@ -33,10 +33,10 @@ public class OrderDto {
     }
 
     public Object getExtraData() {
-        return  extraData;
+        return  extra_data;
     }
 
     public void setExtraData(Object extraData) {
-        this.extraData = extraData;
+        this.extra_data = extraData;
     }
 }

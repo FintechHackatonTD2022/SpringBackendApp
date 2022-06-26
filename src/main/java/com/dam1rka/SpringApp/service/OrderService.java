@@ -15,6 +15,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Objects;
 
@@ -23,6 +24,9 @@ public class OrderService {
 
     private static final Integer mechantId = 88;
     private final String wooppayApi = "https://pci-demo.wooppay.com/api";
+
+    @Value("${wooppay.web.key}")
+    private String webKey;
 
     private final MultiValueMap<String, String> credentials;
 
@@ -42,14 +46,12 @@ public class OrderService {
     }
 
     @PostConstruct
-    @Value("${wooppay.web.key}")
-    private void setAuthoriaztionKey(String key)
-    {
-        credentials.add("Authorization", key);
+    private void setAuthoriaztionKey() {
+        credentials.add("Authorization", webKey);
     }
 
 
-    public void createOrder(OrderDto orderDto) throws Exception {
+    public GetCardResponseDto createOrder(OrderDto orderDto) throws Exception {
         // Create order and save to the database
         OrderEntity order = new OrderEntity();
 
@@ -82,10 +84,15 @@ public class OrderService {
         }
 
         if(Objects.isNull(responseDto))
-            throw new Exception("Null response");
+            throw new IllegalAccessException("Can't access to web api server");
 
         if(Objects.equals(responseDto.getCode(), "-1"))
-            throw new Exception("internal error: " + responseDto.getMessage());
+        {
+            GetCardResponseDto response = new GetCardResponseDto();
+            response.setCode("-1");
+            response.setMessage("Failed");
+            return response;
+        }
 
         // Save response to the database
         OrderResponseEntity responseEntity = new OrderResponseEntity();
@@ -98,30 +105,41 @@ public class OrderService {
         responseEntity.setError_message(responseDto.getMessage());
 
         orderResponseRepo.save(responseEntity);
+
+        // return card info
+        CardInfoDto cardInfo = securityService.decodeCardInfo(responseEntity.getChd());
+
+        GetCardResponseDto response = new GetCardResponseDto();
+        response.setEncrypted(Base64.getEncoder().encodeToString( securityService.encodeCard(cardInfo)));
+        response.setCode("0");
+        response.setMessage("Success");
+
+        return response;
     }
 
     public GetCardResponseDto getCard(GetCardDto getCardDto) {
-        OrderEntity order = orderRepo.findByMsisdn(getCardDto.getTelephone());
-
-        // TODO: add time check (7 days)
-        if(true)
-        {
-            OrderResponseEntity orderResponseEntity = orderResponseRepo.findByOrder(order);
-            CardInfoDto cardInfoDto = securityService.decodeCardInfo(orderResponseEntity.getChd());
-
-            String token = securityService.encodeCard(cardInfoDto);
-            GetCardResponseDto responseDto = new GetCardResponseDto();
-            responseDto.setToken(token);
-            responseDto.setCode("0");
-            responseDto.setMessage("");
-
-            return responseDto;
-        } else {
-            GetCardResponseDto responseDto = new GetCardResponseDto();
-            responseDto.setCode("-1");
-            responseDto.setMessage("Can't get card");
-            return responseDto;
-        }
+//        OrderEntity order = orderRepo.findByMsisdn(getCardDto.getTelephone());
+//
+//        // TODO: add time check (7 days)
+//        if(true)
+//        {
+//            OrderResponseEntity orderResponseEntity = orderResponseRepo.findByOrder(order);
+//            CardInfoDto cardInfoDto = securityService.decodeCardInfo(orderResponseEntity.getChd());
+//
+//            String token = securityService.encodeCard(cardInfoDto);
+//            GetCardResponseDto responseDto = new GetCardResponseDto();
+//            responseDto.setToken(token);
+//            responseDto.setCode("0");
+//            responseDto.setMessage("");
+//
+//            return responseDto;
+//        } else {
+//            GetCardResponseDto responseDto = new GetCardResponseDto();
+//            responseDto.setCode("-1");
+//            responseDto.setMessage("Can't get card");
+//            return responseDto;
+//        }
+        return null;
     }
 
 }
