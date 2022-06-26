@@ -14,6 +14,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.Objects;
 
@@ -40,6 +41,7 @@ public class OrderService {
 
     }
 
+    @PostConstruct
     @Value("${wooppay.web.key}")
     private void setAuthoriaztionKey(String key)
     {
