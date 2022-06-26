@@ -11,8 +11,8 @@ public interface OrderResponseRepo extends JpaRepository<OrderResponseEntity, Lo
 
     OrderResponseEntity findByOrder(OrderEntity order);
 
-//    @Query("SELECT * FROM order_response_entity AS ore LEFT JOIN order_entity AS oe ON oe.id == ore.order_id WHERE ore.error_code == '0' AND oe.msisdn == :telephone ")
-//    List<OrderResponseEntity> findAllByOrders(String telephone);
+    @Query("SELECT ore FROM OrderResponseEntity ore LEFT JOIN OrderEntity oe ON oe = ore.order WHERE ore.error_code = '0' AND oe.msisdn = :telephone")
+    List<OrderResponseEntity> findAllByOrders(String telephone);
 
 
 }

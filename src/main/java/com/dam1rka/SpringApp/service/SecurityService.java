@@ -4,6 +4,7 @@ import com.dam1rka.SpringApp.dto.CardInfoDto;
 import com.dam1rka.SpringApp.dto.GetCardDto;
 import com.dam1rka.SpringApp.dto.OrderDto;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.RSAPrivateKey;
@@ -19,6 +20,8 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.LinkedList;
+import java.util.List;
 
 @Service
 public class SecurityService {
@@ -153,6 +156,17 @@ public class SecurityService {
     public byte[] encodeCard(CardInfoDto cardInfoDto) {
         String data = gson.toJson(cardInfoDto, CardInfoDto.class);
         byte[] encrypted = encode(data);
+        return encrypted;
+    }
+
+    public byte[] encodeCards(List<CardInfoDto> cardInfoDtoList) {
+        StringBuilder data = new StringBuilder("{\n");
+        for(CardInfoDto card : cardInfoDtoList) {
+            data.append(gson.toJson(card, CardInfoDto.class));
+            data.append(",\n");
+        }
+        data.append("}\n");
+        byte[] encrypted = encode(data.toString());
         return encrypted;
     }
 }
