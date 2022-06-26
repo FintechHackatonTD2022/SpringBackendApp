@@ -1,9 +1,6 @@
 package com.dam1rka.SpringApp.dto;
 
-import com.google.gson.JsonObject;
-
 import java.math.BigDecimal;
-import java.util.Date;
 
 public class OrderDto {
     private String msisdn;
