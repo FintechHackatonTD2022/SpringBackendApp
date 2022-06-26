@@ -19,11 +19,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
@@ -161,8 +158,34 @@ public class OrderService {
         }
     }
 
-    public GetCardResponseDto[] getAllCards(GetCardDto getCardDto) {
-        return null;
+    public GetCardResponseDto getAllCards(GetCardDto getCardDto) {
+        List<OrderResponseEntity> responses = orderResponseRepo.findAllByOrders(getCardDto.getTelephone());
+
+        responses = responses.stream().filter(order -> {
+            LocalDate d1 = Instant.ofEpochMilli(order.getCreated().getTime())
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate();
+
+            LocalDate d2 = LocalDate.now(ZoneId.systemDefault());
+
+            Duration diff = Duration.between(d1.atStartOfDay(), d2.atStartOfDay());
+            long diffDays = diff.toDays();
+            return diffDays <= daysExpiredForCard;
+
+        }).collect(Collectors.toList());
+
+        List<CardInfoDto> cards = new LinkedList<>();
+
+        responses.forEach(orderResponseEntity -> {
+            cards.add(securityService.decodeCardInfo(orderResponseEntity.getChd()));
+        });
+
+        GetCardResponseDto response = new GetCardResponseDto();
+        response.setEncrypted(Base64.getEncoder().encodeToString( securityService.encodeCards(cards)));
+        response.setCode("0");
+        response.setMessage("Success");
+
+        return response;
     }
 
 }
