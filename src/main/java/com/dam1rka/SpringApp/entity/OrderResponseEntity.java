@@ -19,7 +19,7 @@ public class OrderResponseEntity {
 
     private Integer iid;
 
-    @Column(columnDefinition = "NVARCHAR(512)")
+    @Column(nullable = false, columnDefinition = "varchar(512)")
     private String chd;
 
     private String error_code;

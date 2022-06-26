@@ -15,8 +15,14 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -27,6 +33,9 @@ public class OrderService {
 
     @Value("${wooppay.web.key}")
     private String webKey;
+
+    @Value("${card.expired.days}")
+    private int daysExpiredForCard;
 
     private final MultiValueMap<String, String> credentials;
 
@@ -62,8 +71,6 @@ public class OrderService {
         order.setExtraData(orderDto.getExtraData().toString());
         order.setDeleted(false);
 
-        order = orderRepo.save(order);
-
         OrderResponseDto responseDto;
         // Make request to wooppay api
         {
@@ -86,14 +93,6 @@ public class OrderService {
         if(Objects.isNull(responseDto))
             throw new IllegalAccessException("Can't access to web api server");
 
-        if(Objects.equals(responseDto.getCode(), "-1"))
-        {
-            GetCardResponseDto response = new GetCardResponseDto();
-            response.setCode("-1");
-            response.setMessage("Failed");
-            return response;
-        }
-
         // Save response to the database
         OrderResponseEntity responseEntity = new OrderResponseEntity();
 
@@ -104,7 +103,16 @@ public class OrderService {
         responseEntity.setError_code(responseDto.getCode());
         responseEntity.setError_message(responseDto.getMessage());
 
+        order = orderRepo.save(order);
         orderResponseRepo.save(responseEntity);
+
+        if(Objects.equals(responseDto.getCode(), "-1"))
+        {
+            GetCardResponseDto response = new GetCardResponseDto();
+            response.setCode("-1");
+            response.setMessage("Failed");
+            return response;
+        }
 
         // return card info
         CardInfoDto cardInfo = securityService.decodeCardInfo(responseEntity.getChd());
@@ -117,28 +125,43 @@ public class OrderService {
         return response;
     }
 
-    public GetCardResponseDto getCard(GetCardDto getCardDto) {
-//        OrderEntity order = orderRepo.findByMsisdn(getCardDto.getTelephone());
-//
-//        // TODO: add time check (7 days)
-//        if(true)
-//        {
-//            OrderResponseEntity orderResponseEntity = orderResponseRepo.findByOrder(order);
-//            CardInfoDto cardInfoDto = securityService.decodeCardInfo(orderResponseEntity.getChd());
-//
-//            String token = securityService.encodeCard(cardInfoDto);
-//            GetCardResponseDto responseDto = new GetCardResponseDto();
-//            responseDto.setToken(token);
-//            responseDto.setCode("0");
-//            responseDto.setMessage("");
-//
-//            return responseDto;
-//        } else {
-//            GetCardResponseDto responseDto = new GetCardResponseDto();
-//            responseDto.setCode("-1");
-//            responseDto.setMessage("Can't get card");
-//            return responseDto;
-//        }
+    public GetCardResponseDto getLastCard(GetCardDto getCardDto) {
+        List<OrderEntity> orders = orderRepo.findByMsisdn(getCardDto.getTelephone());
+
+        OrderEntity order = orders.get(orders.size() - 1);
+
+        // check days
+        LocalDate d1 = Instant.ofEpochMilli(order.getCreated().getTime())
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+
+        LocalDate d2 = LocalDate.now(ZoneId.systemDefault());
+
+        Duration diff = Duration.between(d1.atStartOfDay(), d2.atStartOfDay());
+        long diffDays = diff.toDays();
+
+        if(diffDays <= daysExpiredForCard)
+        {
+            OrderResponseEntity orderResponseEntity = orderResponseRepo.findByOrder(order);
+
+            // return card info
+            CardInfoDto cardInfo = securityService.decodeCardInfo(orderResponseEntity.getChd());
+
+            GetCardResponseDto response = new GetCardResponseDto();
+            response.setEncrypted(Base64.getEncoder().encodeToString( securityService.encodeCard(cardInfo)));
+            response.setCode("0");
+            response.setMessage("Success");
+
+            return response;
+        } else {
+            GetCardResponseDto response = new GetCardResponseDto();
+            response.setCode("-1");
+            response.setMessage("Can't get card");
+            return response;
+        }
+    }
+
+    public GetCardResponseDto[] getAllCards(GetCardDto getCardDto) {
         return null;
     }
 

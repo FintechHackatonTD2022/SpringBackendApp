@@ -30,7 +30,7 @@ public class OrderController {
 
     @PostMapping("get_card/")
     public ResponseEntity<GetCardResponseDto> getCard(@RequestBody EncryptedDto encryptedDto) {
-        return ResponseEntity.ok(orderService.getCard(securityService.decodeGetCard(encryptedDto.getEncrypted())));
+        return ResponseEntity.ok(orderService.getLastCard(securityService.decodeGetCard(encryptedDto.getEncrypted())));
     }
 
 
